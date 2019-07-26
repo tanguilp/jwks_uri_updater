@@ -39,11 +39,11 @@ defmodule JWKSURIUpdater.Updater do
 
       _ ->
         case :ets.lookup(@table_name, jwks_uri) do
-          [{_jwks_uri, _last_update_time, keys}] ->
-            {:ok, keys || []}
-
           [{_jwks_uri, _last_update_time, {:error, error}}] ->
             {:error, error}
+
+          [{_jwks_uri, _last_update_time, keys}] ->
+            {:ok, keys || []}
         end
     end
   end
