@@ -19,7 +19,11 @@ defmodule JWKSURIUpdater.Updater do
     GenServer.start_link(__MODULE__, [], name: @process_name)
   end
 
-  @spec get_keys(String.t, Keyword.t) :: {:ok, [map()] | nil} | {:error, atom()}
+  @doc """
+  Return the keys
+  """
+
+  @spec get_keys(String.t, Keyword.t) :: {:ok, [map()]} | {:error, atom()}
 
   def get_keys(jwks_uri, opts) do
     opts = Keyword.merge(@default_opts, opts)
@@ -34,15 +38,19 @@ defmodule JWKSURIUpdater.Updater do
         {:error, e}
 
       _ ->
-        [{_jwks_uri, _last_update_time, keys}] = :ets.lookup(@table_name, jwks_uri)
+        case :ets.lookup(@table_name, jwks_uri) do
+          [{_jwks_uri, _last_update_time, keys}] ->
+            {:ok, keys || []}
 
-        {:ok, keys}
+          [{_jwks_uri, _last_update_time, {:error, error}}] ->
+            {:error, error}
+        end
     end
   end
 
   defp keys_up_to_date?(jwks_uri, opts) do
     case :ets.lookup(@table_name, jwks_uri) do
-      [{_jwks_uri, last_update_time, nil}] ->
+      [{_jwks_uri, last_update_time, {:error, _}}] ->
         if now() - last_update_time < opts[:min_refresh_interval], do: true, else: false
 
       [{_jwks_uri, last_update_time, _keys}] ->
@@ -100,7 +108,7 @@ defmodule JWKSURIUpdater.Updater do
 
               {:reply, :ok, state}
             _ ->
-              :ets.insert(@table_name, {jwks_uri, now(), nil})
+              :ets.insert(@table_name, {jwks_uri, now(), {:error, error}})
 
               {:reply, {:error, error}, state}
           end
@@ -108,15 +116,13 @@ defmodule JWKSURIUpdater.Updater do
     end
   end
 
-
-
   defp request_and_process_keys(jwks_uri, opts) do
     with :ok <- https_scheme?(jwks_uri),
          {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
            HTTPoison.get(jwks_uri, [], hackney: [ssl_options: opts[:ssl]]),
          {:ok, key_set} <- Poison.decode(body) do
            case key_set do
-             %{"keys" => keys} ->
+             %{"keys" => keys} when is_list(keys) ->
                {:ok, keys}
 
               _ ->

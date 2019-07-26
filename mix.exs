@@ -23,6 +23,7 @@ defmodule JWKSURIUpdater.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:dialyxir, "~> 1.0.0-rc.4", only: [:dev], runtime: false},
       {:httpoison, "~> 1.5"},
       {:poison, "~> 4.0"},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false}
