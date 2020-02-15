@@ -4,11 +4,14 @@ defmodule JWKSURIUpdater.MixProject do
   def project do
     [
       app: :jwks_uri_updater,
-      version: "0.1.1",
+      version: "0.2.0",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      docs: [extras: ["README.md"]]
+      docs: [
+        main: "readme",
+        extras: ["README.md"]
+      ]
     ]
   end
 
@@ -25,6 +28,7 @@ defmodule JWKSURIUpdater.MixProject do
     [
       {:dialyxir, "~> 1.0.0-rc.4", only: [:dev], runtime: false},
       {:httpoison, "~> 1.5"},
+      {:jwk_utils, github: "tanguilp/jwk_utils", tag: "v0.1.1"},
       {:poison, "~> 4.0"},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false}
     ]

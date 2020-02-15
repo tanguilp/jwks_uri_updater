@@ -6,8 +6,7 @@ defmodule JWKSURIUpdater.Updater do
   @default_opts [
     refresh_interval: 3600,
     min_refresh_interval: 10,
-    on_refresh_failure: :discard,
-    ssl: []
+    on_refresh_failure: :discard
   ]
 
   @table_name :jwks_uri_keys
@@ -90,7 +89,7 @@ defmodule JWKSURIUpdater.Updater do
     if keys_up_to_date?(jwks_uri, opts) do
       {:reply, :ok, state}
     else
-      case request_and_process_keys(jwks_uri, opts) do
+      case request_and_process_keys(jwks_uri) do
         {:ok, keys} ->
           :ets.insert(@table_name, {jwks_uri, now(), keys})
 
@@ -116,13 +115,14 @@ defmodule JWKSURIUpdater.Updater do
     end
   end
 
-  defp request_and_process_keys(jwks_uri, opts) do
+  defp request_and_process_keys(jwks_uri) do
     with :ok <- https_scheme?(jwks_uri),
-         {:ok, %HTTPoison.Response{body: body, status_code: 200}} <-
-           HTTPoison.get(jwks_uri, [], hackney: [ssl_options: opts[:ssl]]),
+         {:ok, %HTTPoison.Response{body: body, status_code: 200}} <- HTTPoison.get(jwks_uri),
          {:ok, key_set} <- Poison.decode(body) do
            case key_set do
              %{"keys" => keys} when is_list(keys) ->
+               keys = filter_valid_keys(keys)
+
                {:ok, keys}
 
               _ ->
@@ -135,6 +135,29 @@ defmodule JWKSURIUpdater.Updater do
       {:error, error} ->
         {:error, error}
     end
+  end
+
+  defp filter_valid_keys(keys) do
+    Enum.filter(
+      keys,
+      fn jwk ->
+        case JWKUtils.verify(jwk) do
+          :ok ->
+            true
+
+          {:error, reason} ->
+            case jwk["kid"] do
+              nil ->
+                Logger.warn("Invalid jwk `#{inspect(jwk)}` discarded, reason: #{inspect(reason)}")
+
+              kid ->
+                Logger.warn("Invalid jwk `#{inspect(kid)}` discarded, reason: #{inspect(reason)}")
+            end
+
+            false
+        end
+      end
+    )
   end
 
   defp https_scheme?(jwks_uri) do

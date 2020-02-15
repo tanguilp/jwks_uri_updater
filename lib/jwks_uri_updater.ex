@@ -12,7 +12,6 @@ defmodule JWKSURIUpdater do
   - `on_refresh_failure`: determines the behaviour of JWKSURIUpdater when the keys *become*
   unavailable: `:keep_keys` will keep the keys in the cache, `:discard` will delete them.
   Defaults to `:discard`
-  - `ssl`: Erlang client SSL options for the HTTP request to the issuer. Defaults to `[]`
 
   ## Deviation from the specifications
 
@@ -25,12 +24,6 @@ defmodule JWKSURIUpdater do
   > parser that returns only the lexically last duplicate member name, as
   > specified in Section 15.12 ("The JSON Object") of ECMAScript 5.1
   > [ECMAScript].
-
-  From [OpenID Connect Discovery 1.0 incorporating errata set 1](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata):
-  - a key is not verified against the `"x5c"` attribute if present
-
-  > The JWK x5c parameter MAY be used to provide X.509 representations of keys provided. When
-  > used, the bare key values MUST still be present and MUST match those in the certificate. 
   """
 
   @doc """
@@ -39,7 +32,7 @@ defmodule JWKSURIUpdater do
 
   ## Examples
   ```elixir
-  iex> JWKSURIUpdater.get_keys("https://www.googleapis.com/oauth2/v3/certs")     
+  iex> JWKSURIUpdater.get_keys("https://www.googleapis.com/oauth2/v3/certs")
   {:ok,
    [
      %{
