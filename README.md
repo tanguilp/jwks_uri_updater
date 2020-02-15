@@ -7,7 +7,7 @@ JWKS URI key updater
 ```elixir
 def deps do
   [
-    {:jwks_uri_updater, github: "tanguilp/jwks_uri_updater", tag: "v0.1.1"}
+    {:jwks_uri_updater, github: "tanguilp/jwks_uri_updater", tag: "v0.2.0"}
   ]
 end
 ```
