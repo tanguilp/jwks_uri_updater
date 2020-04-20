@@ -141,7 +141,7 @@ defmodule JWKSURIUpdater.Updater do
     Enum.filter(
       keys,
       fn jwk ->
-        case JWKUtils.verify(jwk) do
+        case JOSEUtils.JWK.verify(jwk) do
           :ok ->
             true
 

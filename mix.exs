@@ -28,7 +28,7 @@ defmodule JWKSURIUpdater.MixProject do
     [
       {:dialyxir, "~> 1.0.0-rc.4", only: [:dev], runtime: false},
       {:httpoison, "~> 1.5"},
-      {:jwk_utils, github: "tanguilp/jwk_utils", tag: "v0.1.1"},
+      {:jose_utils, "~> 0.1.0"},
       {:poison, "~> 4.0"},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false}
     ]
