@@ -4,14 +4,17 @@ defmodule JWKSURIUpdater.MixProject do
   def project do
     [
       app: :jwks_uri_updater,
-      version: "0.2.0",
+      description: "JWKS URI key updater",
+      version: "1.0.0",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       docs: [
         main: "readme",
         extras: ["README.md"]
-      ]
+      ],
+      package: package(),
+      source_url: "https://github.com/tanguilp/jwks_uri_updater"
     ]
   end
 
@@ -32,6 +35,13 @@ defmodule JWKSURIUpdater.MixProject do
       {:jose_utils, "~> 0.1.0"},
       {:poison, "~> 4.0"},
       {:tesla, "~> 1.3.0"}
+    ]
+  end
+
+  def package() do
+    [
+      licenses: ["Apache-2.0"],
+      links: %{"GitHub" => "https://github.com/tanguilp/jwks_uri_updater"}
     ]
   end
 end
