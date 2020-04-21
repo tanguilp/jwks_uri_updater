@@ -117,10 +117,9 @@ defmodule JWKSURIUpdater.Updater do
 
   defp request_and_process_keys(jwks_uri, opts) do
     with :ok <- https_scheme?(jwks_uri),
-         http_client = Tesla.client(tesla_middlewares(opts)),
-         {:ok, %Tesla.Env{body: body, status: 200}} <- Tesla.get(http_client, jwks_uri),
-         {:ok, key_set} <- Poison.decode(body) do
-           case key_set do
+         http_client = opts |> tesla_middlewares() |> Tesla.client(),
+         {:ok, %Tesla.Env{body: body, status: 200}} <- Tesla.get(http_client, jwks_uri) do
+           case body do
              %{"keys" => keys} when is_list(keys) ->
                keys = filter_valid_keys(keys)
 
@@ -172,8 +171,9 @@ defmodule JWKSURIUpdater.Updater do
   end
 
   defp tesla_middlewares(opts) do
-    Application.get_env(:jwks_uri_updater, :tesla_middlewares, []) ++
-      (opts[:tesla_middlewares] || [])
+    Application.get_env(:jwks_uri_updater, :tesla_middlewares, [])
+    ++ (opts[:tesla_middlewares] || [])
+    ++ [Tesla.Middleware.JSON]
   end
 
   defp now(), do: System.system_time(:second)
