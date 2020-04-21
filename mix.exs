@@ -27,10 +27,11 @@ defmodule JWKSURIUpdater.MixProject do
   defp deps do
     [
       {:dialyxir, "~> 1.0.0-rc.4", only: [:dev], runtime: false},
-      {:httpoison, "~> 1.5"},
+      {:ex_doc, "~> 0.19", only: :dev, runtime: false},
+      {:hackney, "~> 1.15.2"},
       {:jose_utils, "~> 0.1.0"},
       {:poison, "~> 4.0"},
-      {:ex_doc, "~> 0.19", only: :dev, runtime: false}
+      {:tesla, "~> 1.3.0"}
     ]
   end
 end

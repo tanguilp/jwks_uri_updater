@@ -3,15 +3,23 @@ defmodule JWKSURIUpdater do
   JWKSURIUpdater dynamically loads jwks URIs keys (lazy-loading) and keeps it in memory for
   further access.
 
+  ## Options
+
   The `get_keys/2` function can be called with the following options:
-  - `refresh_interval`: the number of seconds to keep keys unchanged in cache before it is
+  - `:refresh_interval`: the number of seconds to keep keys unchanged in cache before it is
   fetched again. Defaults to `3600` seconds
-  - `min_refresh_interval`: the delay before JWKSURIUpdater will try to fetch keys of a
+  - `:min_refresh_interval`: the delay before JWKSURIUpdater will try to fetch keys of a
   jwks_uri again. It is intended to prevent fetching storms when the keys are unavailable.
   Defaults to `10` seconds
-  - `on_refresh_failure`: determines the behaviour of JWKSURIUpdater when the keys *become*
+  - `:on_refresh_failure`: determines the behaviour of JWKSURIUpdater when the keys *become*
   unavailable: `:keep_keys` will keep the keys in the cache, `:discard` will delete them.
   Defaults to `:discard`
+  - `:tesla_middlewares`: `Tesla` middlewares to add to the outgoing request
+
+  ## Application environment configuration options
+
+  - `:tesla_middlewares`: `Tesla` middlewares to add to the outgoing request (in addition to
+  those passed as a parameter to `get_keys/1`)
 
   ## Deviation from the specifications
 

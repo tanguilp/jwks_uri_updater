@@ -1,4 +1,6 @@
 defmodule JWKSURIUpdater.Updater do
+  @moduledoc false
+
   use GenServer
 
   require Logger
@@ -19,7 +21,7 @@ defmodule JWKSURIUpdater.Updater do
   end
 
   @doc """
-  Return the keys
+  Returns the JWK keys
   """
 
   @spec get_keys(String.t, Keyword.t) :: {:ok, [map()]} | {:error, atom()}
@@ -64,8 +66,6 @@ defmodule JWKSURIUpdater.Updater do
   @impl true
 
   def init(_opts) do
-    HTTPoison.start()
-
     :ets.new(@table_name, [:set, :named_table, :protected, read_concurrency: true])
 
     unless is_nil(Application.get_env(:jwks_uri_updater, :preload)) do
@@ -89,7 +89,7 @@ defmodule JWKSURIUpdater.Updater do
     if keys_up_to_date?(jwks_uri, opts) do
       {:reply, :ok, state}
     else
-      case request_and_process_keys(jwks_uri) do
+      case request_and_process_keys(jwks_uri, opts) do
         {:ok, keys} ->
           :ets.insert(@table_name, {jwks_uri, now(), keys})
 
@@ -115,9 +115,10 @@ defmodule JWKSURIUpdater.Updater do
     end
   end
 
-  defp request_and_process_keys(jwks_uri) do
+  defp request_and_process_keys(jwks_uri, opts) do
     with :ok <- https_scheme?(jwks_uri),
-         {:ok, %HTTPoison.Response{body: body, status_code: 200}} <- HTTPoison.get(jwks_uri),
+         http_client = Tesla.client(tesla_middlewares(opts)),
+         {:ok, %Tesla.Env{body: body, status: 200}} <- Tesla.get(http_client, jwks_uri),
          {:ok, key_set} <- Poison.decode(body) do
            case key_set do
              %{"keys" => keys} when is_list(keys) ->
@@ -129,7 +130,7 @@ defmodule JWKSURIUpdater.Updater do
                 {:error, :no_keys_parameter}
            end
     else
-      {:ok, %HTTPoison.Response{}} ->
+      {:ok, %Tesla.Env{}} ->
         {:error, :invalid_http_response_code}
 
       {:error, error} ->
@@ -168,6 +169,11 @@ defmodule JWKSURIUpdater.Updater do
       _ ->
         {:error, :not_https_scheme}
     end
+  end
+
+  defp tesla_middlewares(opts) do
+    Application.get_env(:jwks_uri_updater, :tesla_middlewares, []) ++
+      (opts[:tesla_middlewares] || [])
   end
 
   defp now(), do: System.system_time(:second)

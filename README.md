@@ -59,7 +59,9 @@ iex> JWKSURIUpdater.get_keys("https://www.googleapis.com/oauth2/v3/certs")
      "use" => "sig"
    }
  ]}
-iex> JWKSURIUpdater.get_keys("https://login.microsoftonline.com/common/discovery/keys")
+iex> JWKSURIUpdater.get_keys("https://login.microsoftonline.com/common/discovery/keys", tesla_middlewares: [Tesla.Middleware.Logger])
+
+20:46:22.711 [info]  GET https://login.microsoftonline.com/common/discovery/keys -> 200 (296.234 ms)
 {:ok,
  [
    %{
