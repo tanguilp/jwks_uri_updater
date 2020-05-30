@@ -5,7 +5,7 @@ defmodule JWKSURIUpdater.MixProject do
     [
       app: :jwks_uri_updater,
       description: "JWKS URI key updater",
-      version: "1.0.0",
+      version: "1.0.1",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -31,8 +31,8 @@ defmodule JWKSURIUpdater.MixProject do
     [
       {:dialyxir, "~> 1.0.0-rc.4", only: [:dev], runtime: false},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
-      {:hackney, "~> 1.15.2"},
-      {:jose_utils, "~> 0.1.0"},
+      {:hackney, "~> 1.0"},
+      {:jose_utils, "~> 0.1"},
       {:poison, "~> 4.0"},
       {:tesla, "~> 1.3.0"}
     ]
