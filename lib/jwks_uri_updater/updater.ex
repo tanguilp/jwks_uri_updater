@@ -117,7 +117,7 @@ defmodule JWKSURIUpdater.Updater do
 
   defp request_and_process_keys(jwks_uri, opts) do
     with :ok <- https_scheme?(jwks_uri),
-         http_client = opts |> tesla_middlewares() |> Tesla.client(),
+         http_client = opts |> tesla_middlewares() |> Tesla.client(tesla_adapter()),
          {:ok, %Tesla.Env{body: body, status: 200}} <- Tesla.get(http_client, jwks_uri) do
            case body do
              %{"keys" => keys} when is_list(keys) ->
@@ -177,4 +177,6 @@ defmodule JWKSURIUpdater.Updater do
   end
 
   defp now(), do: System.system_time(:second)
+
+  defp tesla_adapter(), do: Application.get_env(:tesla, :adapter, Tesla.Adapter.Hackney)
 end
