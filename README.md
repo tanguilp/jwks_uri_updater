@@ -22,6 +22,10 @@ has to be configured in your `config.exs`:
 config :tesla, adapter: Tesla.Adapter.AnotherOne
 ```
 
+## Support
+
+Elixir 1.10+
+
 ## Usage
 
 ```elixir
