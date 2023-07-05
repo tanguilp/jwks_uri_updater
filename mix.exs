@@ -5,13 +5,13 @@ defmodule JWKSURIUpdater.MixProject do
     [
       app: :jwks_uri_updater,
       description: "JWKS URI key updater",
-      version: "1.1.1",
+      version: "1.1.2",
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       docs: [
         main: "readme",
-        extras: ["README.md"]
+        extras: ["README.md", "CHANGELOG.md"]
       ],
       package: package(),
       source_url: "https://github.com/tanguilp/jwks_uri_updater"
