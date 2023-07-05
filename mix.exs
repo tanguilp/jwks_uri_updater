@@ -33,7 +33,6 @@ defmodule JWKSURIUpdater.MixProject do
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:hackney, "~> 1.0", only: :dev},
       {:jose_utils, "~> 0.1"},
-      {:poison, "~> 4.0"},
       {:tesla, "~> 1.0"}
     ]
   end
