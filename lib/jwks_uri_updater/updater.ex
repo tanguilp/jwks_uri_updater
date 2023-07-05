@@ -24,7 +24,7 @@ defmodule JWKSURIUpdater.Updater do
   Returns the JWK keys
   """
 
-  @spec get_keys(String.t, Keyword.t) :: {:ok, [map()]} | {:error, atom()}
+  @spec get_keys(String.t(), Keyword.t()) :: {:ok, [map()]} | {:error, atom()}
 
   def get_keys(jwks_uri, opts) do
     opts = Keyword.merge(@default_opts, opts)
@@ -57,7 +57,8 @@ defmodule JWKSURIUpdater.Updater do
       [{_jwks_uri, last_update_time, _keys}] ->
         if now() - last_update_time < opts[:refresh_interval], do: true, else: false
 
-      _ -> false
+      _ ->
+        false
     end
   end
 
@@ -69,11 +70,13 @@ defmodule JWKSURIUpdater.Updater do
     :ets.new(@table_name, [:set, :named_table, :protected, read_concurrency: true])
 
     unless is_nil(Application.get_env(:jwks_uri_updater, :preload)) do
-      Enum.each(Application.get_env(:jwks_uri_updater, :preload),
-                fn
-                  {jwks_uri, opts} ->
-                    GenServer.call(@process_name, {:update_keys, jwks_uri, opts})
-                end)
+      Enum.each(
+        Application.get_env(:jwks_uri_updater, :preload),
+        fn
+          {jwks_uri, opts} ->
+            GenServer.call(@process_name, {:update_keys, jwks_uri, opts})
+        end
+      )
     end
 
     {:ok, %{}}
@@ -99,13 +102,17 @@ defmodule JWKSURIUpdater.Updater do
           on_refresh_failure = opts[:on_refresh_failure]
 
           case :ets.lookup(@table_name, jwks_uri) do
-            [{_uri, _last_update_time, keys}] when not is_nil keys
-              and on_refresh_failure == :keep_metadata ->
+            [{_uri, _last_update_time, keys}]
+            when not is_nil(
+                   keys and
+                       on_refresh_failure == :keep_metadata
+                 ) ->
               :ets.update_element(@table_name, jwks_uri, {2, now()})
 
               Logger.warn("#{__MODULE__}: keys for uri #{jwks_uri} can no longer be reached")
 
               {:reply, :ok, state}
+
             _ ->
               :ets.insert(@table_name, {jwks_uri, now(), {:error, error}})
 
@@ -119,15 +126,15 @@ defmodule JWKSURIUpdater.Updater do
     with :ok <- https_scheme?(jwks_uri),
          http_client = opts |> tesla_middlewares() |> Tesla.client(tesla_adapter()),
          {:ok, %Tesla.Env{body: body, status: 200}} <- Tesla.get(http_client, jwks_uri) do
-           case body do
-             %{"keys" => keys} when is_list(keys) ->
-               keys = filter_valid_keys(keys)
+      case body do
+        %{"keys" => keys} when is_list(keys) ->
+          keys = filter_valid_keys(keys)
 
-               {:ok, keys}
+          {:ok, keys}
 
-              _ ->
-                {:error, :no_keys_parameter}
-           end
+        _ ->
+          {:error, :no_keys_parameter}
+      end
     else
       {:ok, %Tesla.Env{}} ->
         {:error, :invalid_http_response_code}
@@ -171,9 +178,9 @@ defmodule JWKSURIUpdater.Updater do
   end
 
   defp tesla_middlewares(opts) do
-    Application.get_env(:jwks_uri_updater, :tesla_middlewares, [])
-    ++ (opts[:tesla_middlewares] || [])
-    ++ [Tesla.Middleware.JSON]
+    Application.get_env(:jwks_uri_updater, :tesla_middlewares, []) ++
+      (opts[:tesla_middlewares] || []) ++
+      [Tesla.Middleware.JSON]
   end
 
   defp now(), do: System.system_time(:second)
