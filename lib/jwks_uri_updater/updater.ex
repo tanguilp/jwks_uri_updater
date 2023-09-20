@@ -109,7 +109,7 @@ defmodule JWKSURIUpdater.Updater do
                  ) ->
               :ets.update_element(@table_name, jwks_uri, {2, now()})
 
-              Logger.warn("#{__MODULE__}: keys for uri #{jwks_uri} can no longer be reached")
+              Logger.warning("#{__MODULE__}: keys for uri #{jwks_uri} can no longer be reached")
 
               {:reply, :ok, state}
 
@@ -155,10 +155,10 @@ defmodule JWKSURIUpdater.Updater do
           {:error, reason} ->
             case jwk["kid"] do
               nil ->
-                Logger.warn("Invalid jwk `#{inspect(jwk)}` discarded, reason: #{inspect(reason)}")
+                Logger.warning("Invalid jwk `#{inspect(jwk)}` discarded, reason: #{inspect(reason)}")
 
               kid ->
-                Logger.warn("Invalid jwk `#{inspect(kid)}` discarded, reason: #{inspect(reason)}")
+                Logger.warning("Invalid jwk `#{inspect(kid)}` discarded, reason: #{inspect(reason)}")
             end
 
             false
