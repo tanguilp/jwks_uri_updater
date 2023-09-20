@@ -155,10 +155,14 @@ defmodule JWKSURIUpdater.Updater do
           {:error, reason} ->
             case jwk["kid"] do
               nil ->
-                Logger.warning("Invalid jwk `#{inspect(jwk)}` discarded, reason: #{inspect(reason)}")
+                Logger.warning(
+                  "Invalid jwk `#{inspect(jwk)}` discarded, reason: #{inspect(reason)}"
+                )
 
               kid ->
-                Logger.warning("Invalid jwk `#{inspect(kid)}` discarded, reason: #{inspect(reason)}")
+                Logger.warning(
+                  "Invalid jwk `#{inspect(kid)}` discarded, reason: #{inspect(reason)}"
+                )
             end
 
             false
